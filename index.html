@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Internet Speed Test</title>
+    <title>Accurate Speed Test</title>
     <style>
         /* ============================================
            GLOBAL STYLES & RESET
@@ -18,86 +18,114 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+            padding: 15px;
             color: #333;
         }
 
-        /* ============================================
-           MAIN CARD CONTAINER
-        ============================================ */
         .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .top-section {
             background: white;
             border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 500px;
-            width: 100%;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
             animation: fadeIn 0.5s ease-in;
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* ============================================
-           TITLE & HEADER
-        ============================================ */
         h1 {
             text-align: center;
             color: #667eea;
-            margin-bottom: 30px;
-            font-size: 28px;
+            margin-bottom: 20px;
+            font-size: clamp(22px, 5vw, 32px);
             font-weight: 600;
         }
 
-        /* ============================================
-           SPEED GAUGE CONTAINERS
-        ============================================ */
-        .speed-section {
-            margin: 30px 0;
+        .test-button {
+            width: 100%;
+            max-width: 400px;
+            display: block;
+            margin: 0 auto;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: clamp(16px, 3vw, 20px);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
 
-        .speed-item {
-            margin-bottom: 30px;
+        .test-button:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
         }
 
-        .speed-label {
-            font-size: 16px;
-            color: #666;
-            margin-bottom: 15px;
-            font-weight: 500;
+        .test-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .button-content {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 10px;
         }
 
-        .speed-label::before {
-            content: '';
-            width: 4px;
-            height: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 2px;
+        .status {
+            text-align: center;
+            margin-top: 15px;
+            font-size: clamp(13px, 2.5vw, 16px);
+            color: #666;
+            min-height: 24px;
+            font-weight: 500;
         }
 
-        /* ============================================
-           CIRCULAR GAUGE DESIGN
-        ============================================ */
+        .status.testing {
+            color: #667eea;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .display-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .speed-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.5s ease-in;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .speed-label {
+            font-size: clamp(16px, 3vw, 18px);
+            color: #666;
+            margin-bottom: 20px;
+            font-weight: 600;
+            text-align: center;
+        }
+
         .gauge-container {
             position: relative;
-            width: 180px;
-            height: 180px;
-            margin: 0 auto;
+            width: min(200px, 80vw);
+            height: min(200px, 80vw);
+            max-width: 220px;
+            max-height: 220px;
+            margin: 0 auto 20px;
         }
 
         .gauge {
@@ -114,14 +142,13 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            transition: --progress 0.3s ease;
         }
 
         .gauge::before {
             content: '';
             position: absolute;
-            width: 140px;
-            height: 140px;
+            width: 80%;
+            height: 80%;
             background: white;
             border-radius: 50%;
         }
@@ -129,74 +156,119 @@
         .speed-value {
             position: relative;
             z-index: 1;
-            font-size: 32px;
-            font-weight: 700;
-            color: #667eea;
             text-align: center;
         }
 
-        .speed-unit {
-            font-size: 14px;
-            color: #999;
+        .speed-number {
+            font-size: clamp(32px, 7vw, 48px);
+            font-weight: 700;
+            color: #667eea;
             display: block;
-            margin-top: 5px;
+            line-height: 1;
         }
 
-        /* ============================================
-           PROGRESS BAR (ALTERNATIVE DISPLAY)
-        ============================================ */
+        .speed-unit {
+            font-size: clamp(12px, 2.5vw, 16px);
+            color: #999;
+            display: block;
+            margin-top: 8px;
+        }
+
+        .speed-info {
+            width: 100%;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .speed-info-item {
+            font-size: clamp(11px, 2vw, 13px);
+            margin: 5px 0;
+            color: #666;
+        }
+
+        .speed-info-item strong {
+            color: #667eea;
+            font-weight: 600;
+        }
+
         .progress-bar-container {
             width: 100%;
-            height: 8px;
+            height: 10px;
             background: #e0e0e0;
             border-radius: 10px;
             overflow: hidden;
-            margin-top: 10px;
+            margin-top: 15px;
         }
 
         .progress-bar {
             height: 100%;
             background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
             width: 0%;
-            transition: width 0.3s ease;
+            transition: width 0.2s ease;
             border-radius: 10px;
         }
 
-        /* ============================================
-           START TEST BUTTON
-        ============================================ */
-        .test-button {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            font-size: 18px;
+        .ping-value {
+            font-size: clamp(32px, 7vw, 48px);
+            font-weight: 700;
+            color: #28a745;
+            margin: 20px 0 10px 0;
+        }
+
+        .ping-label {
+            font-size: clamp(14px, 2.5vw, 16px);
+            color: #666;
+            font-weight: 500;
+        }
+
+        .result-highlight {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.5s ease;
+            display: none;
+        }
+
+        .result-highlight.show {
+            display: block;
+        }
+
+        .result-title {
+            text-align: center;
+            font-size: clamp(18px, 3vw, 22px);
+            color: #667eea;
             font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-            margin-top: 20px;
+            margin-bottom: 20px;
         }
 
-        .test-button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
         }
 
-        .test-button:active:not(:disabled) {
-            transform: translateY(0);
+        .result-item {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
         }
 
-        .test-button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
+        .result-label {
+            color: #666;
+            font-size: clamp(13px, 2vw, 15px);
+            margin-bottom: 10px;
+            font-weight: 500;
         }
 
-        /* ============================================
-           LOADING SPINNER
-        ============================================ */
+        .result-value {
+            color: #667eea;
+            font-size: clamp(20px, 4vw, 28px);
+            font-weight: 700;
+        }
+
         .spinner {
             display: none;
             width: 20px;
@@ -205,7 +277,6 @@
             border-top-color: white;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
-            margin: 0 auto;
         }
 
         @keyframes spin {
@@ -216,21 +287,22 @@
             display: inline-block;
         }
 
-        /* ============================================
-           STATUS MESSAGES
-        ============================================ */
-        .status {
+        .footer {
             text-align: center;
-            margin-top: 20px;
-            font-size: 14px;
-            color: #666;
-            min-height: 20px;
-            font-weight: 500;
+            color: white;
+            font-size: clamp(12px, 2vw, 14px);
+            opacity: 0.9;
+            padding: 20px 0;
         }
 
-        .status.testing {
-            color: #667eea;
-            animation: pulse 1.5s ease-in-out infinite;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes pulse {
@@ -238,441 +310,386 @@
             50% { opacity: 0.5; }
         }
 
-        /* ============================================
-           FOOTER
-        ============================================ */
-        .footer {
-            margin-top: 30px;
-            text-align: center;
-            color: white;
-            font-size: 14px;
-            opacity: 0.9;
-        }
-
-        /* ============================================
-           RESULT HIGHLIGHTS
-        ============================================ */
-        .result-highlight {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            padding: 20px;
-            border-radius: 15px;
-            margin-top: 20px;
-            animation: slideIn 0.5s ease;
-            display: none;
-        }
-
-        .result-highlight.show {
-            display: block;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .result-item {
-            display: flex;
-            justify-content: space-between;
-            margin: 10px 0;
-            font-size: 16px;
-        }
-
-        .result-label {
-            color: #666;
-            font-weight: 500;
-        }
-
-        .result-value {
-            color: #667eea;
-            font-weight: 700;
-        }
-
-        /* ============================================
-           RESPONSIVE DESIGN
-        ============================================ */
-        @media (max-width: 600px) {
-            .container {
-                padding: 30px 20px;
-            }
-
-            h1 {
-                font-size: 24px;
-            }
-
-            .gauge-container {
-                width: 150px;
-                height: 150px;
-            }
-
-            .gauge::before {
-                width: 110px;
-                height: 110px;
-            }
-
-            .speed-value {
-                font-size: 28px;
-            }
-        }
-
-        /* ============================================
-           PING INDICATOR
-        ============================================ */
-        .ping-section {
-            text-align: center;
-            margin: 20px 0;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 10px;
-        }
-
-        .ping-value {
-            font-size: 24px;
-            font-weight: 700;
-            color: #28a745;
-        }
-
-        .ping-label {
-            font-size: 14px;
-            color: #666;
-            margin-top: 5px;
+        @media (max-width: 768px) {
+            .display-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <!-- ============================================
-         MAIN CONTAINER
-    ============================================ -->
     <div class="container">
-        <h1>Internet Speed Test</h1>
-
-        <!-- Download Speed Section -->
-        <div class="speed-section">
-            <div class="speed-item">
-                <div class="speed-label">
-                    Download Speed
+        <div class="top-section">
+            <h1>⚡ Accurate Internet Speed Test</h1>
+            <button class="test-button" id="startButton" onclick="startSpeedTest()">
+                <div class="button-content">
+                    <span id="buttonText">Start Speed Test</span>
+                    <span class="spinner"></span>
                 </div>
+            </button>
+            <div class="status" id="status">Ready to test your connection</div>
+        </div>
+
+        <div class="display-grid">
+            <div class="speed-card">
+                <div class="speed-label">📥 Download Speed</div>
                 <div class="gauge-container">
                     <div class="gauge" id="downloadGauge">
                         <div class="speed-value">
-                            <span id="downloadSpeed">0</span>
+                            <span class="speed-number" id="downloadSpeed">0</span>
                             <span class="speed-unit">Mbps</span>
                         </div>
                     </div>
+                </div>
+                <div class="speed-info">
+                    <div class="speed-info-item">Now: <strong><span id="dlNow">0</span> Mbps</strong></div>
+                    <div class="speed-info-item">Peak: <strong><span id="dlPeak">0</span> Mbps</strong></div>
                 </div>
                 <div class="progress-bar-container">
                     <div class="progress-bar" id="downloadProgress"></div>
                 </div>
             </div>
 
-            <!-- Upload Speed Section -->
-            <div class="speed-item">
-                <div class="speed-label">
-                    Upload Speed
-                </div>
+            <div class="speed-card">
+                <div class="speed-label">📤 Upload Speed</div>
                 <div class="gauge-container">
                     <div class="gauge" id="uploadGauge">
                         <div class="speed-value">
-                            <span id="uploadSpeed">0</span>
+                            <span class="speed-number" id="uploadSpeed">0</span>
                             <span class="speed-unit">Mbps</span>
                         </div>
                     </div>
+                </div>
+                <div class="speed-info">
+                    <div class="speed-info-item">Now: <strong><span id="ulNow">0</span> Mbps</strong></div>
+                    <div class="speed-info-item">Peak: <strong><span id="ulPeak">0</span> Mbps</strong></div>
                 </div>
                 <div class="progress-bar-container">
                     <div class="progress-bar" id="uploadProgress"></div>
                 </div>
             </div>
+
+            <div class="speed-card">
+                <div class="speed-label">📡 Ping</div>
+                <div class="ping-value"><span id="pingValue">--</span> <span style="font-size: 0.6em;">ms</span></div>
+                <div class="ping-label">Latency</div>
+            </div>
         </div>
 
-        <!-- Ping Section -->
-        <div class="ping-section">
-            <div class="ping-value"><span id="pingValue">--</span> ms</div>
-            <div class="ping-label">Ping / Latency</div>
-        </div>
-
-        <!-- Status Message -->
-        <div class="status" id="status">Click "Start Test" to begin</div>
-
-        <!-- Start Test Button -->
-        <button class="test-button" id="startButton" onclick="startSpeedTest()">
-            <span id="buttonText">Start Test</span>
-            <span class="spinner"></span>
-        </button>
-
-        <!-- Results Highlight -->
         <div class="result-highlight" id="results">
-            <div class="result-item">
-                <span class="result-label">Download:</span>
-                <span class="result-value"><span id="finalDownload">0</span> Mbps</span>
-            </div>
-            <div class="result-item">
-                <span class="result-label">Upload:</span>
-                <span class="result-value"><span id="finalUpload">0</span> Mbps</span>
-            </div>
-            <div class="result-item">
-                <span class="result-label">Ping:</span>
-                <span class="result-value"><span id="finalPing">0</span> ms</span>
+            <div class="result-title">🎉 Test Results</div>
+            <div class="result-grid">
+                <div class="result-item">
+                    <div class="result-label">Download</div>
+                    <div class="result-value"><span id="finalDownload">0</span> Mbps</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">Upload</div>
+                    <div class="result-value"><span id="finalUpload">0</span> Mbps</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">Ping</div>
+                    <div class="result-value"><span id="finalPing">0</span> ms</div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Footer -->
-    <div class="footer">
-        Powered by Sonnet 4.5 Internet Speed Test
-    </div>
+    <div class="footer">Accurate Speed Test - Real Peak Speeds</div>
 
     <script>
-        /* ============================================
-           GLOBAL VARIABLES
-        ============================================ */
         let isTesting = false;
+        let downloadBytes = 0;
+        let uploadBytes = 0;
+        let peakDownload = 0;
+        let peakUpload = 0;
 
-        /* ============================================
-           MAIN SPEED TEST FUNCTION
-        ============================================ */
         async function startSpeedTest() {
             if (isTesting) return;
-            
             isTesting = true;
+
             const button = document.getElementById('startButton');
             const status = document.getElementById('status');
-            const results = document.getElementById('results');
             
-            // Reset UI
             button.disabled = true;
             button.classList.add('testing');
             document.getElementById('buttonText').textContent = 'Testing...';
-            results.classList.remove('show');
+            document.getElementById('results').classList.remove('show');
             resetValues();
-            
+
             try {
-                // Test 1: Measure Ping
-                status.textContent = 'Measuring ping...';
+                status.textContent = '📡 Measuring ping...';
                 status.className = 'status testing';
                 const ping = await measurePing();
-                updatePing(ping);
-                
+                document.getElementById('pingValue').textContent = ping;
                 await sleep(500);
-                
-                // Test 2: Measure Download Speed
-                status.textContent = 'Testing download speed...';
-                const downloadSpeed = await measureDownloadSpeed();
-                
+
+                status.textContent = '📥 Testing download (20 streams)...';
+                const downloadSpeed = await testDownload();
                 await sleep(500);
-                
-                // Test 3: Measure Upload Speed
-                status.textContent = 'Testing upload speed...';
-                const uploadSpeed = await measureUploadSpeed();
-                
-                // Show final results
-                status.textContent = 'Test completed!';
+
+                status.textContent = '📤 Testing upload (20 streams with progress tracking)...';
+                const uploadSpeed = await testUpload();
+
+                status.textContent = '✅ Complete!';
                 status.className = 'status';
                 showResults(downloadSpeed, uploadSpeed, ping);
-                
+
             } catch (error) {
-                status.textContent = 'Test failed. Please try again.';
+                status.textContent = '❌ Test failed';
                 status.className = 'status';
-                console.error('Speed test error:', error);
+                console.error(error);
             } finally {
                 isTesting = false;
                 button.disabled = false;
                 button.classList.remove('testing');
-                document.getElementById('buttonText').textContent = 'Start Test';
+                document.getElementById('buttonText').textContent = 'Start Speed Test';
             }
         }
 
-        /* ============================================
-           PING MEASUREMENT
-        ============================================ */
         async function measurePing() {
-            const iterations = 5;
-            let totalPing = 0;
-            
-            // Use a reliable endpoint for ping testing
-            const pingUrl = 'https://www.google.com/favicon.ico?' + Math.random();
-            
-            for (let i = 0; i < iterations; i++) {
-                const startTime = performance.now();
-                
+            const pings = [];
+            for (let i = 0; i < 5; i++) {
+                const start = performance.now();
                 try {
-                    await fetch(pingUrl, { 
-                        method: 'HEAD',
-                        cache: 'no-cache',
-                        mode: 'no-cors' // Avoid CORS issues
+                    await fetch('https://www.google.com/favicon.ico?t=' + Date.now(), {
+                        method: 'HEAD', cache: 'no-cache', mode: 'no-cors'
                     });
-                    const endTime = performance.now();
-                    totalPing += (endTime - startTime);
-                } catch (error) {
-                    // If fetch fails, use a fallback estimation
-                    totalPing += 50; // Fallback ping value
-                }
-                
-                await sleep(100);
+                    pings.push(performance.now() - start);
+                } catch {}
+                await sleep(200);
             }
-            
-            return Math.round(totalPing / iterations);
+            pings.sort((a, b) => a - b);
+            return pings.length ? Math.round(pings[Math.floor(pings.length / 2)]) : 50;
         }
 
-        /* ============================================
-           DOWNLOAD SPEED MEASUREMENT
-        ============================================ */
-        async function measureDownloadSpeed() {
-            // Use multiple test files for more accurate results
-            // These are public CDN files of known sizes
-            const testFiles = [
-                { url: 'https://upload.wikimedia.org/wikipedia/commons/3/3f/JPEG_example_flower.jpg', size: 75000 },
-                { url: 'https://upload.wikimedia.org/wikipedia/commons/2/2c/Rotating_earth_%28large%29.gif', size: 200000 }
+        async function testDownload() {
+            const files = [
+                'https://upload.wikimedia.org/wikipedia/commons/f/ff/Pizigani_1367_Chart_10_MB.jpg',
+                'https://upload.wikimedia.org/wikipedia/commons/a/a9/Pluto_by_LORRI_and_Ralph%2C_13_July_2015.jpg',
+                'https://upload.wikimedia.org/wikipedia/commons/0/00/Crab_Nebula.jpg',
+                'https://upload.wikimedia.org/wikipedia/commons/3/3f/Fronalpstock_big.jpg',
+                'https://upload.wikimedia.org/wikipedia/commons/5/5d/OSIRIS_Mars_true_color.jpg',
+                'https://upload.wikimedia.org/wikipedia/commons/c/c5/M101_hires_STScI-PRC2006-10a.jpg',
+                'https://upload.wikimedia.org/wikipedia/commons/9/98/Aldrin_Apollo_11_original.jpg',
+                'https://upload.wikimedia.org/wikipedia/commons/6/68/Wikinews_Drone_Photography_Sample.jpg'
             ];
-            
-            let totalSpeed = 0;
-            let validTests = 0;
-            
-            for (let i = 0; i < testFiles.length; i++) {
-                try {
-                    const startTime = performance.now();
-                    const cacheBuster = '?t=' + Date.now() + Math.random();
-                    const response = await fetch(testFiles[i].url + cacheBuster, {
-                        cache: 'no-cache'
-                    });
-                    
-                    // Read the response as blob
-                    const blob = await response.blob();
-                    const endTime = performance.now();
-                    
-                    const durationInSeconds = (endTime - startTime) / 1000;
-                    const bitsLoaded = blob.size * 8;
-                    const speedBps = bitsLoaded / durationInSeconds;
-                    const speedMbps = speedBps / (1024 * 1024);
-                    
-                    totalSpeed += speedMbps;
-                    validTests++;
-                    
-                    // Update UI with current speed
-                    updateDownloadSpeed(speedMbps);
-                    
-                } catch (error) {
-                    console.error('Download test error:', error);
+
+            downloadBytes = 0;
+            peakDownload = 0;
+            let active = true;
+            const streams = 20;
+            const duration = 15000;
+
+            setTimeout(() => active = false, duration);
+
+            const download = async (id) => {
+                while (active) {
+                    try {
+                        const url = files[id % files.length] + '?t=' + Date.now() + Math.random();
+                        const response = await fetch(url, { cache: 'no-cache' });
+                        if (!response.body) continue;
+                        
+                        const reader = response.body.getReader();
+                        while (active) {
+                            const {done, value} = await reader.read();
+                            if (done) break;
+                            downloadBytes += value.length;
+                        }
+                        reader.releaseLock();
+                    } catch {}
                 }
+            };
+
+            const workers = [];
+            for (let i = 0; i < streams; i++) {
+                workers.push(download(i));
             }
+
+            let lastBytes = 0;
+            let lastTime = Date.now();
             
-            // Calculate average speed
-            const avgSpeed = validTests > 0 ? totalSpeed / validTests : 0;
-            updateDownloadSpeed(avgSpeed);
-            
-            return avgSpeed;
+            const monitor = setInterval(() => {
+                const now = Date.now();
+                const timeDelta = (now - lastTime) / 1000;
+                const bytesDelta = downloadBytes - lastBytes;
+                
+                if (timeDelta >= 0.1 && bytesDelta > 0) {
+                    const mbps = (bytesDelta * 8) / (timeDelta * 1024 * 1024);
+                    
+                    document.getElementById('dlNow').textContent = mbps.toFixed(2);
+                    
+                    if (mbps > peakDownload) {
+                        peakDownload = mbps;
+                        document.getElementById('dlPeak').textContent = mbps.toFixed(2);
+                        document.getElementById('downloadSpeed').textContent = mbps.toFixed(2);
+                        updateGauge('downloadGauge', mbps);
+                        updateProgressBar('downloadProgress', mbps);
+                    }
+                    
+                    lastBytes = downloadBytes;
+                    lastTime = now;
+                }
+            }, 100);
+
+            await sleep(duration);
+            active = false;
+            clearInterval(monitor);
+            await Promise.allSettled(workers);
+
+            return peakDownload;
         }
 
         /* ============================================
-           UPLOAD SPEED MEASUREMENT
+           REWRITTEN UPLOAD TEST - WITH XHR PROGRESS
         ============================================ */
-        async function measureUploadSpeed() {
-            // Generate test data (1MB blob)
-            const testData = generateTestData(1024 * 1024); // 1MB
-            
-            // Since we can't upload to an actual server without backend,
-            // we'll simulate the upload by measuring browser processing speed
-            // This provides a reasonable estimate
-            
-            const iterations = 3;
-            let totalSpeed = 0;
-            
-            for (let i = 0; i < iterations; i++) {
-                const startTime = performance.now();
+        async function testUpload() {
+            uploadBytes = 0;
+            peakUpload = 0;
+            let active = true;
+            const streams = 20; // 20 parallel streams
+            const duration = 15000; // 15 seconds
+            const chunkSize = 8 * 1024 * 1024; // 8 MB chunks for better measurement
+
+            setTimeout(() => active = false, duration);
+
+            const endpoints = [
+                'https://httpbin.org/post',
+                'https://httpbin.org/anything',
+                'https://postman-echo.com/post',
+                'https://httpbin.org/put'
+            ];
+
+            // Pre-generate upload data
+            const generateData = (size) => {
+                const buffer = new ArrayBuffer(size);
+                const view = new Uint8Array(buffer);
+                for (let i = 0; i < size; i += 1024) {
+                    view[i] = Math.floor(Math.random() * 256);
+                }
+                return new Blob([buffer]);
+            };
+
+            // Upload worker using XMLHttpRequest for progress tracking
+            const upload = async (id) => {
+                let endpointIdx = id;
                 
-                // Simulate upload by creating a FormData and converting to blob
-                // This mimics the overhead of actual upload preparation
-                const formData = new FormData();
-                formData.append('file', testData);
-                
-                // Convert to blob to simulate serialization
-                const blob = new Blob([testData], { type: 'application/octet-stream' });
-                
-                // Simulate network delay
-                await sleep(100 + Math.random() * 100);
-                
-                const endTime = performance.now();
-                
-                const durationInSeconds = (endTime - startTime) / 1000;
-                const bitsUploaded = blob.size * 8;
-                const speedBps = bitsUploaded / durationInSeconds;
-                const speedMbps = speedBps / (1024 * 1024);
-                
-                totalSpeed += speedMbps;
-                
-                // Update UI
-                updateUploadSpeed(speedMbps);
+                while (active) {
+                    try {
+                        const data = generateData(chunkSize);
+                        const endpoint = endpoints[endpointIdx % endpoints.length];
+                        endpointIdx++;
+
+                        await new Promise((resolve, reject) => {
+                            const xhr = new XMLHttpRequest();
+                            let lastLoaded = 0;
+                            let lastProgressTime = Date.now();
+
+                            // Track upload progress in real-time
+                            xhr.upload.addEventListener('progress', (e) => {
+                                if (active && e.lengthComputable) {
+                                    const now = Date.now();
+                                    const timeDelta = (now - lastProgressTime) / 1000;
+                                    const bytesDelta = e.loaded - lastLoaded;
+                                    
+                                    if (timeDelta >= 0.05 && bytesDelta > 0) {
+                                        uploadBytes += bytesDelta;
+                                        lastLoaded = e.loaded;
+                                        lastProgressTime = now;
+                                    }
+                                }
+                            });
+
+                            xhr.addEventListener('load', () => {
+                                if (active && lastLoaded < chunkSize) {
+                                    uploadBytes += (chunkSize - lastLoaded);
+                                }
+                                resolve();
+                            });
+
+                            xhr.addEventListener('error', reject);
+                            xhr.addEventListener('abort', resolve);
+                            xhr.addEventListener('timeout', resolve);
+
+                            xhr.open('POST', endpoint, true);
+                            xhr.timeout = 30000;
+                            xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+                            
+                            if (!active) {
+                                reject();
+                                return;
+                            }
+                            
+                            xhr.send(data);
+                        }).catch(() => {});
+
+                    } catch (error) {
+                        if (!active) break;
+                        await sleep(100);
+                    }
+                }
+            };
+
+            // Start all streams
+            const workers = [];
+            for (let i = 0; i < streams; i++) {
+                workers.push(upload(i));
             }
+
+            // Monitor speed every 100ms
+            let lastBytes = 0;
+            let lastTime = Date.now();
             
-            // Calculate average and apply realistic factor
-            // Since this is simulated, we apply a reduction factor
-            const avgSpeed = (totalSpeed / iterations) * 0.15; // Realistic factor
-            updateUploadSpeed(avgSpeed);
-            
-            return avgSpeed;
+            const monitor = setInterval(() => {
+                const now = Date.now();
+                const timeDelta = (now - lastTime) / 1000;
+                const bytesDelta = uploadBytes - lastBytes;
+                
+                if (timeDelta >= 0.1 && bytesDelta > 0) {
+                    const mbps = (bytesDelta * 8) / (timeDelta * 1024 * 1024);
+                    
+                    // Update current speed
+                    document.getElementById('ulNow').textContent = mbps.toFixed(2);
+                    
+                    // Track peak
+                    if (mbps > peakUpload) {
+                        peakUpload = mbps;
+                        document.getElementById('ulPeak').textContent = mbps.toFixed(2);
+                        document.getElementById('uploadSpeed').textContent = mbps.toFixed(2);
+                        updateGauge('uploadGauge', mbps);
+                        updateProgressBar('uploadProgress', mbps);
+                    }
+                    
+                    lastBytes = uploadBytes;
+                    lastTime = now;
+                }
+            }, 100);
+
+            await sleep(duration);
+            active = false;
+            clearInterval(monitor);
+            await Promise.allSettled(workers);
+
+            return peakUpload;
         }
 
-        /* ============================================
-           HELPER FUNCTION: GENERATE TEST DATA
-        ============================================ */
-        function generateTestData(sizeInBytes) {
-            const buffer = new ArrayBuffer(sizeInBytes);
-            const view = new Uint8Array(buffer);
-            
-            // Fill with random data
-            for (let i = 0; i < sizeInBytes; i++) {
-                view[i] = Math.floor(Math.random() * 256);
-            }
-            
-            return new Blob([buffer]);
+        function updateGauge(id, speed) {
+            const max = 300;
+            const pct = Math.min(speed / max, 1);
+            document.getElementById(id).style.setProperty('--progress', (pct * 360) + 'deg');
         }
 
-        /* ============================================
-           UI UPDATE FUNCTIONS
-        ============================================ */
-        function updateDownloadSpeed(speed) {
-            const displaySpeed = speed.toFixed(2);
-            document.getElementById('downloadSpeed').textContent = displaySpeed;
-            updateGauge('downloadGauge', speed);
-            updateProgressBar('downloadProgress', speed);
-        }
-
-        function updateUploadSpeed(speed) {
-            const displaySpeed = speed.toFixed(2);
-            document.getElementById('uploadSpeed').textContent = displaySpeed;
-            updateGauge('uploadGauge', speed);
-            updateProgressBar('uploadProgress', speed);
-        }
-
-        function updatePing(ping) {
-            document.getElementById('pingValue').textContent = ping;
-        }
-
-        function updateGauge(gaugeId, speed) {
-            // Max speed for gauge is 100 Mbps
-            const maxSpeed = 100;
-            const percentage = Math.min(speed / maxSpeed, 1);
-            const degrees = percentage * 360;
-            
-            const gauge = document.getElementById(gaugeId);
-            gauge.style.setProperty('--progress', degrees + 'deg');
-        }
-
-        function updateProgressBar(barId, speed) {
-            // Max speed for progress bar is 100 Mbps
-            const maxSpeed = 100;
-            const percentage = Math.min((speed / maxSpeed) * 100, 100);
-            
-            document.getElementById(barId).style.width = percentage + '%';
+        function updateProgressBar(id, speed) {
+            const max = 300;
+            const pct = Math.min((speed / max) * 100, 100);
+            document.getElementById(id).style.width = pct + '%';
         }
 
         function resetValues() {
             document.getElementById('downloadSpeed').textContent = '0';
             document.getElementById('uploadSpeed').textContent = '0';
+            document.getElementById('dlNow').textContent = '0';
+            document.getElementById('dlPeak').textContent = '0';
+            document.getElementById('ulNow').textContent = '0';
+            document.getElementById('ulPeak').textContent = '0';
             document.getElementById('pingValue').textContent = '--';
             updateGauge('downloadGauge', 0);
             updateGauge('uploadGauge', 0);
@@ -680,28 +697,18 @@
             updateProgressBar('uploadProgress', 0);
         }
 
-        function showResults(downloadSpeed, uploadSpeed, ping) {
-            document.getElementById('finalDownload').textContent = downloadSpeed.toFixed(2);
-            document.getElementById('finalUpload').textContent = uploadSpeed.toFixed(2);
+        function showResults(dl, ul, ping) {
+            document.getElementById('finalDownload').textContent = dl.toFixed(2);
+            document.getElementById('finalUpload').textContent = ul.toFixed(2);
             document.getElementById('finalPing').textContent = ping;
             document.getElementById('results').classList.add('show');
         }
 
-        /* ============================================
-           UTILITY FUNCTION: SLEEP/DELAY
-        ============================================ */
         function sleep(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
 
-        /* ============================================
-           INITIALIZATION
-        ============================================ */
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('Internet Speed Test App Loaded');
-            // Set initial gauge state
-            resetValues();
-        });
+        document.addEventListener('DOMContentLoaded', resetValues);
     </script>
 </body>
 </html>
